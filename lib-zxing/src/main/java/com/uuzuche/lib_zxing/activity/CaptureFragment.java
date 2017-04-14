@@ -48,6 +48,8 @@ public class CaptureFragment extends Fragment implements SurfaceHolder.Callback 
     private CodeUtils.AnalyzeCallback analyzeCallback;
     private Camera camera;
 
+    private static MyOnCompletionListener sBeepListener;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +120,9 @@ public class CaptureFragment extends Fragment implements SurfaceHolder.Callback 
     public void onDestroy() {
         super.onDestroy();
         inactivityTimer.shutdown();
+        if (sBeepListener != null) {
+            sBeepListener = null;
+        }
         super.onDestroy();
     }
 
@@ -205,7 +210,10 @@ public class CaptureFragment extends Fragment implements SurfaceHolder.Callback 
             getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setOnCompletionListener(beepListener);
+            if (sBeepListener == null) {
+                sBeepListener = new MyOnCompletionListener();
+            }
+            mediaPlayer.setOnCompletionListener(sBeepListener);
 
             AssetFileDescriptor file = getResources().openRawResourceFd(
                     R.raw.beep);
@@ -236,11 +244,23 @@ public class CaptureFragment extends Fragment implements SurfaceHolder.Callback 
     /**
      * When the beep has finished playing, rewind to queue up another one.
      */
-    private final MediaPlayer.OnCompletionListener beepListener = new MediaPlayer.OnCompletionListener() {
+ /*   private final MediaPlayer.OnCompletionListener beepListener = new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mediaPlayer) {
             mediaPlayer.seekTo(0);
         }
-    };
+    };*/
+
+    /**
+     * When the beep has finished playing, rewind to queue up another one.
+     */
+    private static final class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
+
+        @Override
+        public void onCompletion(MediaPlayer mediaPlayer) {
+            mediaPlayer.seekTo(0);
+        }
+    }
+
 
     public CodeUtils.AnalyzeCallback getAnalyzeCallback() {
         return analyzeCallback;

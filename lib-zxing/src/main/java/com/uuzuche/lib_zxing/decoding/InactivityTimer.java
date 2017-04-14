@@ -18,6 +18,7 @@ package com.uuzuche.lib_zxing.decoding;
 
 import android.app.Activity;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -33,17 +34,19 @@ public final class InactivityTimer {
 
     private final ScheduledExecutorService inactivityTimer =
             Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
-    private final Activity activity;
+    // private final Activity activity;
+    private final WeakReference<Activity> activityWeakReference;
     private ScheduledFuture<?> inactivityFuture = null;
 
     public InactivityTimer(Activity activity) {
-        this.activity = activity;
+        // this.activity = activity;
+        activityWeakReference = new WeakReference<Activity>(activity);
         onActivity();
     }
 
     public void onActivity() {
         cancel();
-        inactivityFuture = inactivityTimer.schedule(new FinishListener(activity),
+        inactivityFuture = inactivityTimer.schedule(new FinishListener(activityWeakReference.get()),
                 INACTIVITY_DELAY_SECONDS,
                 TimeUnit.SECONDS);
     }
@@ -58,6 +61,7 @@ public final class InactivityTimer {
     public void shutdown() {
         cancel();
         inactivityTimer.shutdown();
+        activityWeakReference.clear();
     }
 
     private static final class DaemonThreadFactory implements ThreadFactory {

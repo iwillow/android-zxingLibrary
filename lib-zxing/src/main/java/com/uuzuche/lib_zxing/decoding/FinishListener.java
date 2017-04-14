@@ -19,16 +19,19 @@ package com.uuzuche.lib_zxing.decoding;
 import android.app.Activity;
 import android.content.DialogInterface;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Simple listener used to exit the app in a few cases.
  */
 public final class FinishListener
         implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener, Runnable {
-
-    private final Activity activityToFinish;
+    // private final Activity activityToFinish;
+    private final WeakReference<Activity> activityWeakReference;
 
     public FinishListener(Activity activityToFinish) {
-        this.activityToFinish = activityToFinish;
+        // this.activityToFinish = activityToFinish;
+        activityWeakReference = new WeakReference<Activity>(activityToFinish);
     }
 
     public void onCancel(DialogInterface dialogInterface) {
@@ -40,7 +43,11 @@ public final class FinishListener
     }
 
     public void run() {
-        activityToFinish.finish();
+        //activityToFinish.finish();
+        if (activityWeakReference.get() != null) {
+            activityWeakReference.get().finish();
+            activityWeakReference.clear();
+        }
     }
 
 }
