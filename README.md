@@ -21,6 +21,8 @@
 
 - compile 2.1 2016/11/22 修复扫描中的一些bug
 
+- compile 2.2 2017/04/14 修改了InactivityTimer中引用的activity没有及时释放导致内存泄露的问题(暂未发布)
+
 **使用说明**
 
 - 可打开默认二维码扫描页面
@@ -214,7 +216,7 @@ if (requestCode == REQUEST_IMAGE) {
 
 ```
 /**
-     * 二维码解析回调函数
+     * 二维码解析回调函数（注意防止内存泄露，不要用非静态内部类或者非静态匿名类）
      */
     CodeUtils.AnalyzeCallback analyzeCallback = new CodeUtils.AnalyzeCallback() {
         @Override
